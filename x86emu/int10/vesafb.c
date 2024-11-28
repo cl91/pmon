@@ -531,14 +531,18 @@ int  vesafb_init(void)
 	u32 fb_address, io_address;
 	u32 tmp;
 
+	pcitag_t pa_tag = 0;
 	if(vga_dev != NULL){
-		fb_address  =_pci_conf_read(vga_dev->pa.pa_tag,0x10);
-		io_address  =_pci_conf_read(vga_dev->pa.pa_tag,0x18);
+		pa_tag = vga_dev->pa.pa_tag;
 	}
 	if(pcie_dev != NULL){
-		fb_address  =_pci_conf_read(pcie_dev->pa.pa_tag,0x10);
-		io_address  =_pci_conf_read(pcie_dev->pa.pa_tag,0x18);
+		pa_tag = pcie_dev->pa.pa_tag;
 	}
+	if (!pa_tag) {
+		return;
+	}
+	fb_address  =_pci_conf_read(pa_tag, 0x10);
+	io_address  =_pci_conf_read(pa_tag, 0x18);
 	//io_vaddr = io_address | 0xbfd00000;
 	//io_vaddr = io_address | BONITO_PCIIO_BASE_VA;
 	io_vaddr = io_address | 0xb8000000;
@@ -546,7 +550,7 @@ int  vesafb_init(void)
 	/* We assume all the framebuffer is required remmapping */
 #ifdef USETLB
 	/* Remap framebuffer address to 0x40000000, which can be accessed by same physical address from cpu */
-	_pci_conf_write(vga_dev->pa.pa_tag, 0x10, 0x40000000);
+	_pci_conf_write(pa_tag, 0x10, 0x40000000);
 	/* FIXME: video memory size should be detected by software, but now fixed in 2MB that's enough in PMON */
 	video_mem_size = 0x200000;
 
@@ -576,7 +580,7 @@ int  vesafb_init(void)
 
 #if	0
 	/* 0x10000000 -> 0x40000000 PCI mapping */
-	_pci_conf_write(vga_dev->pa.pa_tag, 0x10, 0x40000000);
+	_pci_conf_write(pa_tag, 0x10, 0x40000000);
 	tmp = BONITO_PCIMAP;
 	BONITO_PCIMAP = 
 	    BONITO_PCIMAP_WIN(0, 0x40000000) |	
