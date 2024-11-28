@@ -450,7 +450,7 @@ int vga_bios_init(void)
 	set_return_trap(pInt);
 
 	vbiosMem = (char *)base + V_BIOS;
-	(void)memset(vbiosMem, 0, 2 * V_BIOS_SIZE);
+	(void)memset(vbiosMem, 0, V_BIOS_SIZE);
 	{
 		struct pci_device *pdev;
 		unsigned long romsize = 0;
